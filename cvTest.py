@@ -14,18 +14,6 @@ def find_gates(num_qubit,px):
         qubit_reg[num_qubit].append(match.span())
     return qubit_reg
 
-# def find_qubits(lns):
-#     pure_lines=[]
-#     pix_matrix = cv2.imread("diagram2.png",cv2.IMREAD_GRAYSCALE)
-#     # The "q" representing each qubit causes an extra edge to appear. This is a lazy fix.
-#     pix_matrix = pix_matrix[:,100:]
-#     for i in range(len(lns)-1):
-#         #The 2 is the width of every line representing a qubit.
-#         if lns[i+1]-(v:=lns[i])==2:
-#             pure_lines.append(pix_matrix[v+1,:])
-#     return pure_lines
-
-
 def find_lines(inp, debug = None):
     pix_matrix = cv2.imread(inp,cv2.IMREAD_GRAYSCALE)
     #The "q" representing each qubit causes an extra edge to appear. This is a lazy fix. Make this more dyamic
@@ -44,8 +32,6 @@ def find_lines(inp, debug = None):
                 ver_lines.append(x0)
             elif y:
                 hor_lines.append(y0)
-            else:
-                print("WARNING: A strange line was found. This indicates internal problems.")
             if debug:
                 pt1 = (x0 - 100 * y,y0 + 100 * x)
                 pt2 = (x0 + 100 * y,y0 - 100 * x)
@@ -57,27 +43,15 @@ def find_lines(inp, debug = None):
         cv2.imwrite(debug, pix_matrix)
     pure_lines = []
     other_lines=[]
-    pix_matrix = cv2.imread("diagram2.png",cv2.IMREAD_GRAYSCALE)
-    # The "q" representing each qubit causes an extra edge to appear. This is a lazy fix.
-    
-    pix_matrix = pix_matrix[:,100:]
     for i in range(len(hor_lines) - 1):
         # The 2 is the width of every line representing a qubit.
         if hor_lines[i + 1] - (v := hor_lines[i]) == 2:
             pure_lines.append((v+1,pix_matrix[v + 1,:]))
-        else:
-            #Fix this!
-            #if v-1 in pure_lines:
-            #    print(v-1)
+        elif hor_lines[i]-hor_lines[i-1]==2:
             pass
+        else:
+            other_lines.append(hor_lines[i])
     qubit_registry = {}
     for ind,col in pure_lines:
         qubit_registry.update(find_gates(ind,col))
-    print(qubit_registry)
-    print(other_lines)
-    print(len(other_lines))
-
 find_lines("diagram2.png","lines3.png")
-
-
-
