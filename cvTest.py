@@ -5,18 +5,18 @@ from matplotlib import pyplot as plt
 from matplotlib import image
 import re
 
-def find_gates(num_qubit,px):
-    qubit_reg= {num_qubit: []}
+def find_gates(location,px):
+    qubit_reg= {location: []}
     reg=re.compile("[0]{5,}")
     #This is a strange approach. Maybe improve this method?
     color_string=("".join(str(st) for st in px))
     for match in re.finditer(reg,color_string):
-        qubit_reg[num_qubit].append(match.span())
+        qubit_reg[location].append(match.span())
     return qubit_reg
 
 def find_lines(inp, debug = None):
     pix_matrix = cv2.imread(inp,cv2.IMREAD_GRAYSCALE)
-    #The "q" representing each qubit causes an extra edge to appear. This is a lazy fix. Make this more dyamic
+    #The "q" representing each qubit causes an extra edge to appear. This is a lazy fix. Make this more dynamic
     pix_matrix=pix_matrix[:,100:]
     # These numbers are random, if the sensivity seems off, look here. Remove Magic Numbers.
     edges = cv2.Canny(pix_matrix, 80, 120)
@@ -52,6 +52,5 @@ def find_lines(inp, debug = None):
         else:
             other_lines.append(hor_lines[i])
     qubit_registry = {}
-    for ind,col in pure_lines:
-        qubit_registry.update(find_gates(ind,col))
-find_lines("diagram2.png","lines3.png")
+    for y_pos,col in pure_lines:
+        qubit_registry.update(find_gates(y_pos,col))
