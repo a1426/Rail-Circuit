@@ -14,13 +14,24 @@ def find_gates(location,px):
         qubit_reg[location].append(match.span())
     return qubit_reg
 def cut_off(img):
+    prev = -1
+    current_run=[]
+    whites=[]
     for index,column in enumerate(img.T):
-        prev=-1
-        if np.all(column==255) and True:
-            #Replace True with something more
-            print(index)
+    #Fix this
+        if np.all(column==255):
+            if index==prev+1:
+                current_run.append(index)
+                print(current_run,end="-\n")
+        else:
+            if current_run:
+                whites.append(current_run)
+            print("reached")
+            current_run = []
+        prev=index
+    print(whites)
 
-def find_lines(inp, debug = None):
+def find_lines(inp, debug = ""):
     pix_matrix = cv2.imread(inp,cv2.IMREAD_GRAYSCALE)
     #The "q" representing each qubit causes an extra edge to appear. This is a lazy fix. Make this more dynamic
     cut_off(pix_matrix)
