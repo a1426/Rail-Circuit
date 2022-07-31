@@ -13,29 +13,40 @@ def find_gates(location,px):
     for match in re.finditer(reg,color_string):
         qubit_reg[location].append(match.span())
     return qubit_reg
+def high_low(value,selection_list, default_height):
+    if value in selection_list:
+        #In case some weird stuff happens
+        raise Error
+    else:
+        try:
+            higher = min([element for element in selection_list if element-value > 0])
+        except ValueError:
+            higher=default_height
+        try:
+            lower = max(element for element in selection_list if element-value < 0)
+        except ValueError:
+            lower=0
+        return lower,higher
 def cut_off(img):
-    prev = -1
     current_run=[]
-    whites=[]
+    n_white=[]
+    prev=True
     for index,column in enumerate(img.T):
-    #Fix this
-        if np.all(column==255):
-            if index==prev+1:
-                current_run.append(index)
-                print(current_run,end="-\n")
+        if not (current:=np.all(column==255)):
+            current_run.append(index)
         else:
-            if current_run:
-                whites.append(current_run)
-            print("reached")
-            current_run = []
-        prev=index
-    print(whites)
-
+            if not prev==current:
+                n_white.append(current_run)
+                current_run=[]
+        prev=current
+    #The first element is the q, the second is the circuit
+    main_circuit=n_white[1]
+    return main_circuit[0]+1,main_circuit[-1]+1
 def find_lines(inp, debug = ""):
-    pix_matrix = cv2.imread(inp,cv2.IMREAD_GRAYSCALE)
-    #The "q" representing each qubit causes an extra edge to appear. This is a lazy fix. Make this more dynamic
-    cut_off(pix_matrix)
-    pix_matrix=pix_matrix[:,100:]
+    pix_matrix = cv2.imread(inp,cv2.IMREAD_GRAYSCALE) 
+    begin, end=cut_off(pix_matrix)
+    pix_matrix=pix_matrix[:,begin:end]
+    height=pix_matrix.shape[0]
     # These numbers are random, if the sensivity seems off, look here. Remove Magic Numbers.
     edges = cv2.Canny(pix_matrix, 80, 120)
     lines = cv2.HoughLines(edges, 1, np.pi / 2, 20, None)
@@ -60,7 +71,6 @@ def find_lines(inp, debug = ""):
     if debug:
         cv2.imwrite(debug, pix_matrix)
     pure_lines = []
-    #Array of tuples that stores
     corresponding_lines=[]
     other_lines=[]
     for i in range(len(hor_lines) - 1):
@@ -72,16 +82,28 @@ def find_lines(inp, debug = ""):
             pass
         else:
             other_lines.append(hor_lines[i])
-    #print(corresponding_lines)
     qubit_registry = {}
     for y_pos,col in corresponding_lines:
         qubit_registry.update(find_gates(y_pos,col))
     print(qubit_registry)
-    print(other_lines)
-    print(pure_lines)
-    for key in qubit_registry.values():
-        print([0]+list(chain(*key)))
-find_lines("diagram2.png","lines3.png")
+    for key,value in qubit_registry.items():
+        print("Ran")
+        l,h = high_low(key,other_lines,height)
+        flat_list = list(chain(*value))
+        flat_list.remove(0)
+        flat_list.pop()
+        grouped_list = [flat_list[index:index + 2] for index in range(0,len(flat_list),2)]
+        ct=0
+        for left,right in grouped_list:
+            #Issue with value of lower and upper, fix immediately
+            print(left,right)
+            ct+=1
+            selection= pix_matrix[l:h,:]
+            with open(name:=f"img_save/{ct}.png","w+"):
+                cv2.imwrite(name,selection)
+        break
+
+find_lines("diagram3.png","lines4.png")
 
 
 
