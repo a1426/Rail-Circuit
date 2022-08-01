@@ -14,19 +14,15 @@ def find_gates(location,px):
         locations.append(match.span())
     return {location:locations}
 def high_low(value,selection_list, default_height):
-    if value in selection_list:
-        #In case some weird stuff happens
-        raise Error
-    else:
-        try:
-            higher = min([element for element in selection_list if element-value > 0])
-        except ValueError:
-            higher=default_height
-        try:
-            lower = max(element for element in selection_list if element-value < 0)
-        except ValueError:
-            lower=0
-        return lower,higher
+    try:
+        higher = min([element for element in selection_list if element-value > 0])
+    except ValueError:
+        higher=default_height
+    try:
+        lower = max(element for element in selection_list if element-value < 0)
+    except ValueError:
+        lower=0
+    return lower,higher
 def cut_off(img):
     current_run=[]
     n_white=[]
@@ -42,7 +38,7 @@ def cut_off(img):
     #The first element is the q, the second is the circuit
     main_circuit=n_white[1]
     return main_circuit[0]+1,main_circuit[-1]+1
-def find_lines(inp, debug = ""):
+def isolate_gates(inp, debug = ""):
     pix_matrix = cv2.imread(inp,cv2.IMREAD_GRAYSCALE) 
     begin, end=cut_off(pix_matrix)
     pix_matrix=pix_matrix[:,begin:end]
@@ -86,9 +82,7 @@ def find_lines(inp, debug = ""):
     qubit_registry = {}
     for y_pos,col in corresponding_lines:
         qubit_registry.update(find_gates(y_pos,col))
-    print(qubit_registry)
     for key,value in qubit_registry.items():
-        print("Ran")
         l,h = high_low(key,other_lines,height)
         flat_list = list(chain(*value))
         flat_list.remove(0)
@@ -96,10 +90,8 @@ def find_lines(inp, debug = ""):
         grouped_list = [flat_list[index:index + 2] for index in range(0,len(flat_list),2)]
         ct=0
         for left,right in grouped_list:
-            #Issue with value of lower and upper
-            print(left,right)
             ct+=1
             selection= pix_matrix[l:h,left:right]
             with open(name:=f"img_save/{ct}.png","w+"):
                 cv2.imwrite(name,selection)
-find_lines("diagram3.png","lines4.png")
+isolate_gates("diagram3.png","lines4.png")
