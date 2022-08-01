@@ -94,4 +94,3 @@ def isolate_gates(inp, debug = ""):
             selection= pix_matrix[l:h,left:right]
             with open(name:=f"img_save/{ct}.png","w+"):
                 cv2.imwrite(name,selection)
-isolate_gates("diagram3.png","lines4.png")
