@@ -6,13 +6,13 @@ from matplotlib import image
 import re
 from itertools import chain
 def find_gates(location,px):
-    qubit_reg= {location: []}
-    reg=re.compile("[0]{5,}")
+    locations=[]
+    reg=re.compile("[0-]{5,}")
     #This is a strange approach. Maybe improve this method?
-    color_string=("".join(str(st) for st in px))
+    color_string=("".join(str(st)[0] for st in px))
     for match in re.finditer(reg,color_string):
-        qubit_reg[location].append(match.span())
-    return qubit_reg
+        locations.append(match.span())
+    return {location:locations}
 def high_low(value,selection_list, default_height):
     if value in selection_list:
         #In case some weird stuff happens
@@ -64,12 +64,13 @@ def find_lines(inp, debug = ""):
             if debug:
                 pt1 = (x0 - 100 * y,y0 + 100 * x)
                 pt2 = (x0 + 100 * y,y0 - 100 * x)
-                cv2.line(pix_matrix, pt1, pt2, (0, 0, 0), 1)
+                img_clone= np.copy(pix_matrix)
+                cv2.line(img_clone, pt1, pt2, (0, 0, 0), 1)
     except TypeError:
         raise TypeError("No lines were detected.")
     hor_lines.sort(),ver_lines.sort()
     if debug:
-        cv2.imwrite(debug, pix_matrix)
+        cv2.imwrite(debug, img_clone)
     pure_lines = []
     corresponding_lines=[]
     other_lines=[]
@@ -95,15 +96,10 @@ def find_lines(inp, debug = ""):
         grouped_list = [flat_list[index:index + 2] for index in range(0,len(flat_list),2)]
         ct=0
         for left,right in grouped_list:
-            #Issue with value of lower and upper, fix immediately
+            #Issue with value of lower and upper
             print(left,right)
             ct+=1
-            selection= pix_matrix[l:h,:]
+            selection= pix_matrix[l:h,left:right]
             with open(name:=f"img_save/{ct}.png","w+"):
                 cv2.imwrite(name,selection)
-        break
-
 find_lines("diagram3.png","lines4.png")
-
-
-
