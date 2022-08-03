@@ -2,27 +2,28 @@ from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit.tools.visualization import circuit_drawer
 from random import randint, choice
 import matplotlib.pyplot as plt
+import gate_finder
+from collections import defaultdict
 def random_component(obj):
-    return choice([obj.x, obj.y, obj.z])
-class Pauli_XYZ:
+    return choice([obj.x, obj.y, obj.z,obj.h, obj.i, obj.s, obj.sdg, obj.t, obj.tdg])
+class Simple_Square_Gates:
     def __init__(self,size):
         self.circuit=QuantumCircuit(size)
-        self.history=""
-        for x in range(randint(1,10)):
-            #Seems to be strangely biased against Y. ?? Need to review.
+        self.history= defaultdict(int)
+        self.gates={}
+        for x in range(randint(5,10)):
             method=random_component(self.circuit)
             pos=randint(0,size-1)
+            self.history[pos]+=1
             method(pos)
-            #Note: This is a lazy implementation for xyz gates, but works. FIX LATER.
-            self.history+=(str(method)[29]+f"{pos}")
+            self.gates[f'{pos}-{self.history[pos]}']=method.__name__
+        print(self.gates)
+
     def export(self):
         self.circuit.draw(output="mpl")
-        plt.savefig("generated_circuits/test.pdf")
-    def give_result(self):
-        #Should return the correct classification. DO LATER
-        pass
-c1=Pauli_XYZ(2)
-print(c1.history)
+        plt.savefig("src2/generated_circuits/test.png")
+c1=Simple_Square_Gates(2)
 c1.export()
+gate_finder.clear()
 
-
+gate_finder.isolate_gates("src2/generated_circuits/test.png")
