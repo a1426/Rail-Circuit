@@ -50,10 +50,10 @@ def cut_off(img):
     #The last element is the circuit.
     main_circuit=n_white[-1]
     return main_circuit[0]+1,main_circuit[-1]+1
-def clear():
-    for f in os.listdir("src2/img_save"):
-        os.remove(f"src2/img_save/{f}")
-def isolate_gates(inp, debug = ""):
+def clear(target):
+    for f in os.listdir(target):
+        os.remove(f"{target}/{f}")
+def isolate_gates(inp, target, debug = ""):
     pix_matrix = cv2.imread(inp,cv2.IMREAD_GRAYSCALE) 
     begin, end=cut_off(pix_matrix)
     pix_matrix=pix_matrix[:,begin:end]
@@ -100,7 +100,6 @@ def isolate_gates(inp, debug = ""):
             qubit_registry.update(qubit)
     qubit_num=0
     for key,value in qubit_registry.items():
-        qubit_num+=1
         l,h = high_low(key,other_lines,height)
         flat_list = list(chain(*value))
         flat_list.pop()
@@ -108,7 +107,8 @@ def isolate_gates(inp, debug = ""):
         grouped_list = [flat_list[index:index + 2] for index in range(0,len(flat_list),2)]
         ct=0
         for left,right in grouped_list:
-            ct+=1
+            ct += 1
             selection= pix_matrix[l:h,left:right]
-            with open(name:=f"src2/img_save/{qubit_num}-{ct}.png","w+"):
+            with open(name:=f"{target}/{qubit_num}-{ct}.png","w+"):
                 cv2.imwrite(name,selection)
+        qubit_num += 1
