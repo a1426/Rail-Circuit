@@ -4,10 +4,11 @@ from random import randint, choice
 import matplotlib.pyplot as plt
 import gate_finder
 from collections import defaultdict
-from os import makedirs,getcwd
-from json import dumps
+import os
 def random_component(obj):
     return choice([obj.x, obj.y, obj.z,obj.h, obj.i, obj.s, obj.sdg, obj.t, obj.tdg])
+component_list=["x","y","z","h","i","s","sdg","t","tdg"]
+folder_sizes = defaultdict(int)
 class Simple_Square_Gates:
     def __init__(self,size):
         self.circuit=QuantumCircuit(size)
@@ -21,18 +22,26 @@ class Simple_Square_Gates:
             self.gates[f'{pos}-{self.history[pos]}']=method.__name__
     def export(self):
         self.circuit.draw(output="mpl")
-        print(getcwd())
         plt.savefig("generated_circuits/test.png")
-    def generate_folder(self,path):
-        try:
-            makedirs(path)
-        except FileExistsError:
-            gate_finder.clear("img_save")
+    def generate_folders(self,path):
+        if os.path.exists(path):
+            gate_finder.clear(path)
+        else:
+            os.makedirs(path)
         gate_finder.isolate_gates("generated_circuits/test.png",path)
-        with open(f"{path}/labels.json","w+") as file:
-            data=dumps(self.gates)
-            file.write(data)
+        for file_path in os.listdir(path):
+            file_name=os.path.splitext(file_path)[0]
+            current_gate=self.gates[file_name]
+            name=str(folder_sizes[current_gate])
+            os.rename(os.path.join("img_save",file_path),os.path.join("gates",current_gate,name+".png"))
+            folder_sizes[current_gate]+=1
+def initialize_folders():
+    for gate_type in component_list:
+        try:
+            os.makedirs(os.path.join("gates",gate_type))
+        except FileExistsError:
+            pass
 def generate(size):
     c1=Simple_Square_Gates(size)
     c1.export()
-    c1.generate_folder(f"img_save")
+    c1.generate_folders(f"img_save")
