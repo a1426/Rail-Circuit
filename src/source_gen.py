@@ -8,9 +8,10 @@ import os
 def random_component(obj):
     return choice([obj.x, obj.y, obj.z,obj.h, obj.i, obj.s, obj.sdg, obj.t, obj.tdg])
 component_list=["x","y","z","h","i","s","sdg","t","tdg"]
-folder_sizes = defaultdict(int)
+
 class Simple_Square_Gates:
     def __init__(self,size):
+        self.folder_sizes = defaultdict(int)
         self.circuit=QuantumCircuit(size)
         self.history= defaultdict(int)
         self.gates={}
@@ -32,16 +33,18 @@ class Simple_Square_Gates:
         for file_path in os.listdir(path):
             file_name=os.path.splitext(file_path)[0]
             current_gate=self.gates[file_name]
-            name=str(folder_sizes[current_gate])
+            name=str(self.folder_sizes[current_gate])
             os.rename(os.path.join("img_save",file_path),os.path.join("gates",current_gate,name+".png"))
-            folder_sizes[current_gate]+=1
+            self.folder_sizes[current_gate]+=1
 def initialize_folders():
     for gate_type in component_list:
         try:
             os.makedirs(os.path.join("gates",gate_type))
         except FileExistsError:
             pass
-def generate(size):
+def generate(size, folder_size=None):
     c1=Simple_Square_Gates(size)
+    if folder_size: c1.folder_sizes = folder_size
     c1.export()
     c1.generate_folders(f"img_save")
+    return c1.folder_sizes
