@@ -1,50 +1,40 @@
-from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
-from qiskit.tools.visualization import circuit_drawer
-from random import randint, choice
+from qiskit import QuantumCircuit
+from random import choice
 import matplotlib.pyplot as plt
-import gate_finder
+from gate_finder2 import single_square_gates
 from collections import defaultdict
-import os
 def random_component(obj):
-    return choice([obj.x, obj.y, obj.z,obj.h, obj.i, obj.s, obj.sdg, obj.t, obj.tdg])
-component_list=["x","y","z","h","i","s","sdg","t","tdg"]
+    return choice([obj.x, obj.y, obj.z,obj.h, obj.id, obj.s, obj.sdg, obj.t, obj.tdg])
+component_list=["x","y","z","h","id","s","sdg","t","tdg"]
 
+#Creates a quantum circuit consisting of 10 gates
 class Simple_Square_Gates:
-    def __init__(self,size):
+    def __init__(self):
         self.folder_sizes = defaultdict(int)
-        self.circuit=QuantumCircuit(size)
-        self.history= defaultdict(int)
-        self.gates={}
-        for x in range(1,10):
+        self.circuit=QuantumCircuit(1)
+        self.gates=[]
+        for x in range(10):
             method=random_component(self.circuit)
-            pos=randint(0,size-1)
-            self.history[pos]+=1
-            method(pos)
-            self.gates[f'{pos}-{self.history[pos]}']=method.__name__
-    def export(self):
+            method(0)
+            self.gates.append(method.__name__)
+    def export(self, path, validate=False):
+        #Determines whether to export the figure to the training or validation directory.
+        spl="train" if validate==False else "val"
+        #Generates the image.
         self.circuit.draw(output="mpl")
-        plt.savefig("generated_circuits/test.png")
-    def generate_folders(self,path):
-        if os.path.exists(path):
-            gate_finder.clear(path)
-        else:
-            os.makedirs(path)
-        gate_finder.isolate_gates("generated_circuits/test.png",path)
-        for file_path in os.listdir(path):
-            file_name=os.path.splitext(file_path)[0]
-            current_gate=self.gates[file_name]
-            name=str(self.folder_sizes[current_gate])
-            os.rename(os.path.join("img_save",file_path),os.path.join("gates",current_gate,name+".png"))
-            self.folder_sizes[current_gate]+=1
-def initialize_folders():
-    for gate_type in component_list:
-        try:
-            os.makedirs(os.path.join("gates",gate_type))
-        except FileExistsError:
-            pass
-def generate(size, folder_size=None):
-    c1=Simple_Square_Gates(size)
-    if folder_size: c1.folder_sizes = folder_size
-    c1.export()
-    c1.generate_folders(f"img_save")
-    return c1.folder_sizes
+        plt.savefig(f"/Users/robert/Projects/datasets/testDataset/images/{spl}/{path}.png")
+        plt.close()
+        #Generates the labels.
+        with open(f"/Users/robert/Projects/datasets/testDataset/labels/{spl}/{path}.txt","w") as file:
+            #code to write labels here
+            widths,min_y,max_y,w,h=single_square_gates(f"/Users/robert/Projects/datasets/testDataset/images/{spl}/{path}.png")
+            for x in range(10):
+                file.write(f"{component_list.index(self.gates[x])} {(widths[x][1]+widths[x][0])/(2*w)} {(min_y+max_y)/(2*h)} {(widths[x][1]-widths[x][0])/w} {(max_y-min_y)/h}\n")
+            
+
+def generate(num, split):
+    for x in range(int(num*split)):
+        Simple_Square_Gates().export(str(x))
+    for x in range(int(num*(1-split))):
+        Simple_Square_Gates().export(str(x), True)
+
