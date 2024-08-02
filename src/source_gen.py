@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 from random import choice
 import matplotlib.pyplot as plt
-from gate_finder2 import single_square_gates
+from gate_finder import single_square_gates
 from collections import defaultdict
 def random_component(obj):
     return choice([obj.x, obj.y, obj.z,obj.h, obj.id, obj.s, obj.sdg, obj.t, obj.tdg])
