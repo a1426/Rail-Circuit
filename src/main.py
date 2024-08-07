@@ -3,17 +3,16 @@ from ultralytics import YOLO
 from PIL import Image
 from qiskit import QuantumCircuit
 
-
-#Names, to map the ids of the boxes onto the names.
-with open("/Users/robert/Projects/datasets/testDataset/data.yaml") as file:
-    try:
-        names=yaml.safe_load(file)["names"]
-    except yaml.YAMLError as e:
-        print(e)
-
-qubits=[]
-def find_qubits(img):
-    temp=[]
+def main(img):
+    #Names, to map the ids of the boxes onto the names.
+    with open("/Users/robert/Projects/datasets/testDataset/data.yaml") as file:
+        try:
+            names=yaml.safe_load(file)["names"]
+        except yaml.YAMLError as e:
+            print(e)
+    #Find qubits
+    #TODO:Fix.
+    qubits_y=[]
     im=Image.open(img).convert("RGB")
     width, height = im.size
     previously_colored=False
@@ -22,26 +21,28 @@ def find_qubits(img):
         counter=0
         for x in range(width):
             r,g,b=im.getpixel((x,y))
-            if(r==g==b<50):
+            if(r==g==b<10):
                 counter+=1
-            if(counter>=20):
+            else:
+                counter=0
+            if(counter>=15):
                 colored_column=True
                 break
         if(colored_column and not previously_colored):
-            qubits.append([y])
+            qubits_y.append([y])
         if(previously_colored and not colored_column):
-            qubits[-1]=(qubits[-1][0]+y)//2
+            qubits_y[-1]=(qubits_y[-1][0]+y)//2
         previously_colored=colored_column
 
-find_qubits("/Users/robert/Projects/RailConverter/Rail-Circuit/src/test.png")
 
-qc=QuantumCircuit(len(qubits))
+    qc=QuantumCircuit(len(qubits_y))
+    qubits={x:[] for x in range(len(qubits_y))}
 
-ss_model = YOLO("models/squares/best.pt")
+    ss_model = YOLO("models/squares/best.pt")
 
-boxes=[]
-def generate_boxes(path):
-    shapes=ss_model(path)[0]
+    boxes=[]
+
+    shapes=ss_model(img)[0]
     shapes.save(filename="result.jpg") #save to disk
     #Test for overlapping boxes
     for box in shapes.boxes:
@@ -57,6 +58,15 @@ def generate_boxes(path):
             boxes.append(box)
         if(len(boxes)==0):
             boxes.append(box)
-generate_boxes("/Users/robert/Projects/datasets/testDataset/images/train/1.png")
-boxes.sort(key= lambda box:box.xyxyn[0][0])
-print(len(boxes))
+
+    boxes.sort(key=lambda box:box.xyxyn[0][0])
+    print(qubits_y)
+    for box in boxes:
+        for y in range(len(qubits_y)):
+            if box.xyxy[0][1]<qubits_y[y]<box.xyxy[0][3]:
+                qubits[y].append(box)
+                print(y)
+        
+
+
+main("/Users/robert/Projects/datasets/testDataset/images/train/1.png")
