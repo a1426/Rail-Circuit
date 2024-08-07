@@ -18,7 +18,7 @@ class Simple_Square_Gates:
         self.circuit=QuantumCircuit(1)
         self.gates=[]
         for x in range(10):
-            #Bit strange here
+            #A strange approach here here
             method=eval("self.circuit."+choice(list(names.values())))
             method(0)
             self.gates.append(method.__name__)
@@ -37,8 +37,8 @@ class Simple_Square_Gates:
                 file.write(f"{next(k for k, v in names.items() if v == self.gates[x])} {(widths[x][1]+widths[x][0])/(2*w)} {(min_y+max_y)/(2*h)} {(widths[x][1]-widths[x][0])/w} {(max_y-min_y)/h}\n")
             
 
-def generate(num, split):
+def generate(num, split, start=0):
     for x in range(int(num*split)):
-        Simple_Square_Gates().export(str(x))
+        Simple_Square_Gates().export(str(x+start))
     for x in range(int(num*(1-split))):
-        Simple_Square_Gates().export(str(x), True)
+        Simple_Square_Gates().export(str(x+start), True)
