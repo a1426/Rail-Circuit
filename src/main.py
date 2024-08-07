@@ -58,15 +58,15 @@ def main(img):
             boxes.append(box)
         if(len(boxes)==0):
             boxes.append(box)
-
+    
     boxes.sort(key=lambda box:box.xyxyn[0][0])
     print(qubits_y)
     for box in boxes:
         for y in range(len(qubits_y)):
             if box.xyxy[0][1]<qubits_y[y]<box.xyxy[0][3]:
                 qubits[y].append(box)
-                print(y)
-        
-
-
-main("/Users/robert/Projects/datasets/testDataset/images/train/1.png")
+    
+    for k,v in qubits.items():
+        for box in v:
+            exec(f"qc.{names[int(box.cls[0])]}({k})")
+    return qc
