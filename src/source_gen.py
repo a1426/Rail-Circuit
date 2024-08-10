@@ -5,7 +5,7 @@ from collections import defaultdict
 import yaml
 import matplotlib.pyplot as plt
 from math import pi
-with open("/Users/robert/Projects/datasets/testDataset/data.yaml") as file:
+with open("dataset/square_dataset/data.yaml") as file:
     try:
         names=yaml.safe_load(file)["names"]
     except yaml.YAMLError as e:
@@ -33,16 +33,15 @@ class Simple_Square_Gates:
         spl="train" if validate==False else "val"
         #Generates the image.
         self.circuit.draw(output="mpl")
-        plt.savefig(f"/Users/robert/Projects/datasets/newDataset/images/{spl}/{path}.png")
+        plt.savefig(f"dataset/square_dataset/images/{spl}/{path}.png")
         plt.close()
         #Generates the labels.
-        with open(f"/Users/robert/Projects/datasets/newDataset/labels/{spl}/{path}.txt","w") as file:
+        with open(f"dataset/square_dataset/labels/{spl}/{path}.txt","w") as file:
             #code to write labels here
-            widths,min_y,max_y,w,h=single_square_gates(f"/Users/robert/Projects/datasets/newDataset/images/{spl}/{path}.png")
+            widths,min_y,max_y,w,h=single_square_gates(f"dataset/square_dataset/images/{spl}/{path}.png")
             for x in range(10):
                 file.write(f"{next(k for k, v in names.items() if v == self.gates[x])} {(widths[x][1]+widths[x][0])/(2*w)} {(min_y+max_y)/(2*h)} {(widths[x][1]-widths[x][0])/w} {(max_y-min_y)/h}\n")
             
-
 def generate(num, split, start=0):
     for x in range(int(num*split)):
         Simple_Square_Gates().export(str(x+start))
