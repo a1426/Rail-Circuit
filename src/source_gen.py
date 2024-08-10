@@ -1,10 +1,10 @@
 from qiskit import QuantumCircuit
-from random import choice
+import random
 from gate_finder import single_square_gates
 from collections import defaultdict
 import yaml
 import matplotlib.pyplot as plt
-
+from math import pi
 with open("/Users/robert/Projects/datasets/testDataset/data.yaml") as file:
     try:
         names=yaml.safe_load(file)["names"]
@@ -19,8 +19,14 @@ class Simple_Square_Gates:
         self.gates=[]
         for x in range(10):
             #A strange approach here here
-            method=eval("self.circuit."+choice(list(names.values())))
-            method(0)
+            method=eval("self.circuit."+random.choice(list(names.values())))
+            args=[]
+            for x in range(method.__code__.co_argcount - (0 if method.__defaults__ is None else len(method.__defaults__))):
+                a=random(-1,1000)
+                if(a<0):
+                    a=pi/random.randint(2,10)
+                args.append(a)
+            method(*args,0)
             self.gates.append(method.__name__)
     def export(self, path, validate=False):
         #Determines whether to export the figure to the training or validation directory.
