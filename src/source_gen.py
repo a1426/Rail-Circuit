@@ -1,7 +1,6 @@
 from qiskit import QuantumCircuit
 import random
 from gate_finder import single_square_gates
-from collections import defaultdict
 import yaml
 import matplotlib.pyplot as plt
 from math import pi
@@ -14,7 +13,6 @@ with open("datasets/square_dataset/data.yaml") as file:
 #Creates a quantum circuit consisting of 10 gates
 class Simple_Square_Gates:
     def __init__(self):
-        self.folder_sizes = defaultdict(int)
         self.circuit=QuantumCircuit(1)
         self.gates=[]
         for x in range(10):
@@ -43,8 +41,8 @@ class Simple_Square_Gates:
             for x in range(10):
                 file.write(f"{next(k for k, v in names.items() if v == self.gates[x])} {(widths[x][1]+widths[x][0])/(2*w)} {(min_y+max_y)/(2*h)} {(widths[x][1]-widths[x][0])/w} {(max_y-min_y)/h}\n")
             
-def generate(num, split, start=0):
+def generate(num, split, start1=0,start2=0):
     for x in range(int(num*split)):
-        Simple_Square_Gates().export(str(x+start))
+        Simple_Square_Gates().export(str(x+start1))
     for x in range(int(num*(1-split))):
-        Simple_Square_Gates().export(str(x+start), True)
+        Simple_Square_Gates().export(str(x+start2), True)
