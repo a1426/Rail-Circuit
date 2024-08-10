@@ -4,7 +4,7 @@ from PIL import Image
 from qiskit import QuantumCircuit
 
 #Names, to map the ids of the boxes onto the names.
-with open("/Users/robert/Projects/datasets/testDataset/data.yaml") as file:
+with open("datasets/square_dataset/data.yaml") as file:
         try:
             names=yaml.safe_load(file)["names"]
         except yaml.YAMLError as e:
@@ -82,5 +82,3 @@ def main(img):
         for box in v:
             exec(f"qc.{names[int(box.cls[0])]}({k})")
     return qc
-    
-#main("/Users/robert/Projects/datasets/testDataset/images/train/1.png")
