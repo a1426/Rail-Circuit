@@ -1,5 +1,4 @@
 from PIL import Image
-#Gate color: #03BAB6 or 3,186,182
 
 def single_square_gates(img):
     im=Image.open(img)
