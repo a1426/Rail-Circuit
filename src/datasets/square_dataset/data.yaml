@@ -1,0 +1,22 @@
+path: square_dataset
+train: images/train
+val: images/val
+
+names: 
+  0: x
+  1: y
+  2: z
+  3: h
+  4: id
+  5: s
+  6: sdg
+  7: t
+  8: tdg
+  9: sx
+  10: sxdg
+  11: p
+  12: r
+  13: rx
+  14: ry
+  15: rz
+  16: u
