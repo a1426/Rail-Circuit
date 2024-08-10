@@ -21,7 +21,8 @@ class Simple_Square_Gates:
             #A strange approach here here
             method=eval("self.circuit."+random.choice(list(names.values())))
             args=[]
-            for x in range(method.__code__.co_argcount - (0 if method.__defaults__ is None else len(method.__defaults__))):
+            #Note: 1 argument is the qubit, the other is the self???
+            for x in range(method.__code__.co_argcount - (0 if method.__defaults__ is None else len(method.__defaults__))-2):
                 a=random.uniform(-1,1000)
                 if(a<0):
                     a=pi/random.randint(2,10)
