@@ -1,0 +1,5 @@
+tesseract
+pytesseract
+PIL
+ultralytics
+qiskit
