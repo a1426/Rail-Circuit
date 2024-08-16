@@ -1,20 +1,20 @@
-import yaml
+from yaml import safe_load, YAMLError
 from ultralytics import YOLO
 from PIL import Image
 from qiskit import QuantumCircuit
-import pytesseract
-import numpy as np
-import cv2
+from pytesseract import image_to_string
+from numpy import ones, array, uint8
+from cv2 import resize, erode
 import re
 
 class OCRException(Exception):
     pass
 
-#Names, to map the ids of the boxes onto the names.
+#Generates a dictionary that maps the classification values into gate names.
 with open("datasets/square_dataset/data.yaml") as file:
         try:
-            names=yaml.safe_load(file)["names"]
-        except yaml.YAMLError as e:
+            names=safe_load(file)["names"]
+        except YAMLError as e:
             print(e)
 
 class single_gate():
@@ -32,11 +32,11 @@ class single_gate():
             #TODO: Refine the approach with Tesseract. This does not work with values that involve pi.
             greyscale=im.crop((self.x1,self.y1,self.x2,self.y2)).convert("L")
             #Some basic image manipulations to improve OCR accuracy.
-            img=np.array(greyscale)
-            img=cv2.resize(img,None,fx=10,fy=10)
-            kernel = np.ones((2, 2), np.uint8) 
-            img=cv2.erode(img, kernel, iterations=1)
-            d=pytesseract.image_to_string(img,lang="eng+equ+grc",config=r'--oem 3 --psm 6')
+            img=array(greyscale)
+            img=resize(img,None,fx=10,fy=10)
+            kernel = ones((2, 2), uint8) 
+            img=erode(img, kernel, iterations=1)
+            d=image_to_string(img,lang="eng+equ+grc",config=r'--oem 3 --psm 6')
             p=re.findall("[-]?\d+[.\d+]?",d.split("\n")[1])
             if len(p)!=self.method.__code__.co_argcount - (0 if self.method.__defaults__ is None else len(self.method.__defaults__))-2:
                 raise OCRException()
@@ -44,8 +44,7 @@ class single_gate():
                 self.args=[int(x) for x in p] 
             
 def find_qubits(im):
-    #Find qubits
-    #TODO:Fix.
+    #Finds the rails(horizontal black lines). A hacky approach, but effective.
     previously_colored=False
     for y in range(im.size[1]):
         colored_column=False
@@ -83,7 +82,6 @@ def main(img):
     qubits={x:[] for x in range(len(qubits_y))}
     ss_model = YOLO("models/squares/best.pt")
     shapes=ss_model(img)[0]
-    shapes.save(filename="result.jpg") #save to disk
     #Test for overlapping boxes
     for box in shapes.boxes:
         g1=single_gate(box)
